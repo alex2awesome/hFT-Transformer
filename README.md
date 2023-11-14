@@ -6,8 +6,6 @@ and implements an inference script to transcribe directories of piano files.
 ## Usage
 For training and evaluation, see the original repo.
 
-If you want to avoid training models from scratch, you can download and put the model under the `checkpoint/MAESTRO-V3` directory.
-
 The inference script we built uses the model trained for MAESTRO. We haven't yet evaluated it on different datasets, we just ran it.
 
 To run, download `model_016_003.pkl`:
