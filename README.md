@@ -4,11 +4,9 @@ This repository forks **"Automatic Piano Transcription with Hierarchical Frequen
 and implements an inference script to transcribe directories of piano files.
 
 ## Usage
-For training and evaluation, see the original repo.
+To do training and evaluation, see the original repo.
 
-The inference script we built uses the model trained for MAESTRO. We haven't yet evaluated it on different datasets, we just ran it.
-
-To run, download `model_016_003.pkl`:
+To do inference, first download `model_016_003.pkl`:
 
 ```
 $ wget https://github.com/sony/hFT-Transformer/releases/download/ismir2023/checkpoint.zip
@@ -24,6 +22,8 @@ python evaluation/transcribe_new_files.py \
     -f_config corpus/MAESTRO-V3/dataset/config.json \
     -model_file evaluation/checkpoint/MAESTRO-V3/model_016_003.pkl
 ```    
+
+NOTE: Inference here uses the model that the original authors trained for MAESTRO. We haven't yet evaluated it on different datasets yet and thus don't know how transferrable it is, we just wrote scripts to run it. Evaluation to come.
 
 ## Development Environment
 - OS
