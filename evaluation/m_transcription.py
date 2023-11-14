@@ -113,14 +113,17 @@ if __name__ == '__main__':
             out_file = args.d_out.rstrip('/')+'/'+fname+'_result_note_'+str(args.output)+'.json'
             ref_int, ref_pitch = mir_eval.io.load_valued_intervals(ref_file)
             est_int, est_pitch = mir_eval.io.load_valued_intervals(est_file)
-            scores = mir_eval.transcription.evaluate(ref_int, ref_pitch, est_int, est_pitch)
+            scores = mir_eval.transcription.evaluate(
+                ref_int, ref_pitch, est_int, est_pitch
+            )
         else:
             ref_file = args.d_ref.rstrip('/')+'/'+fname+'_velocity.txt'
             out_file = args.d_out.rstrip('/')+'/'+fname+'_result_note_velocity_'+str(args.output)+'.json'
             ref_int, ref_pitch, ref_vel = _load_transcription_velocity(ref_file)
             est_int, est_pitch, est_vel = _load_transcription_velocity(est_file)
-            scores = mir_eval.transcription_velocity.evaluate(ref_int, ref_pitch, ref_vel,
-                                                              est_int, est_pitch, est_vel)
+            scores = mir_eval.transcription_velocity.evaluate(
+                ref_int, ref_pitch, ref_vel, est_int, est_pitch, est_vel
+            )
 
         # output
         with open(out_file, 'w', encoding='utf-8') as f:
@@ -135,9 +138,9 @@ if __name__ == '__main__':
     for attr in result:
         result[attr] /= count
     if args.velocity is False:
-        fo = open(args.d_est.rstrip('/')+'/result_note'+valid_data+'_'+str(args.output)+'.json', 'w', encoding='utf-8')
+        fo = open(args.d_est.rstrip('/') + '/result_note' + valid_data + '_' + str(args.output) + '.json', 'w', encoding='utf-8')
     else:
-        fo = open(args.d_est.rstrip('/')+'/result_note_velocity'+valid_data+'_'+str(args.output)+'.json', 'w', encoding='utf-8')
+        fo = open(args.d_est.rstrip('/') + '/result_note_velocity' + valid_data + '_' + str(args.output) + '.json', 'w', encoding='utf-8')
     json.dump(result, fo, ensure_ascii=False, indent=4, sort_keys=False)
     fo.close()
     print(result)

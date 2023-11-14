@@ -36,22 +36,25 @@ def make_dataset(filelist, attribute, d_feature, d_label, d_dataset, config, n_d
         a_fname[div].append(fname)
 
         # num frame
-        with open(d_feature+'/'+fname+'.pkl', 'rb') as f:
-            feature_tmp = pickle.load(f)
-        num_frame_feature = feature_tmp.shape[0]
-        del feature_tmp
-        with open(d_label+'/'+fname+'.pkl', 'rb') as f:
-            label_tmp = pickle.load(f)
-        num_frame_label = len(label_tmp['mpe'])
-        del label_tmp
+        feature_fname = d_feature + '/' + fname + '.pkl'
+        if os.path.exists(feature_fname):
+            with open(feature_fname, 'rb') as f:
+                feature_tmp = pickle.load(f)
+            num_frame_feature = feature_tmp.shape[0]
+            del feature_tmp
+            with open(d_label + '/' + fname + '.pkl', 'rb') as f:
+                label_tmp = pickle.load(f)
+            num_frame_label = len(label_tmp['mpe'])
+            del label_tmp
 
-        if num_frame_feature < num_frame_label:
-            print('(warning) '+str(fname)+': num_frame_feature('+str(num_frame_feature)+') < num_frame_label('+str(num_frame_label)+')')
-        num_frame = max(num_frame_feature, num_frame_label)
+            if num_frame_feature < num_frame_label:
+                print('(warning) ' + str(fname) + ': num_frame_feature(' + str(num_frame_feature) + ') < num_frame_label(' + str(num_frame_label) + ')')
+            num_frame = max(num_frame_feature, num_frame_label)
 
-        a_num_frame[div].append(num_frame)
-        a_total_num_frame[div] += num_frame + config['input']['margin_f'] + config['input']['num_frame'] - 1
-        a_total_num_frame_idx[div] += num_frame
+            a_num_frame[div].append(num_frame)
+            a_total_num_frame[div] += num_frame + config['input']['margin_f'] + config['input']['num_frame'] - 1
+            a_total_num_frame_idx[div] += num_frame
+
     del a_fname_all
 
     if div_flag is True:
@@ -71,17 +74,17 @@ def make_dataset(filelist, attribute, d_feature, d_label, d_dataset, config, n_d
         loc_i = 0
         loc_d = config['input']['margin_b']
         for i in range(len(a_fname[div])):
-            print('(idx) '+str(i)+'/'+str(len(a_fname[div]))+': '+str(a_fname[div][i]))
+            print('(idx) ' + str(i) + '/' + str(len(a_fname[div])) + ': ' + str(a_fname[div][i]))
 
             num_frame = a_num_frame[div][i]
-            a_dataset_idx[loc_i:loc_i+num_frame] = np.arange(loc_d, loc_d+num_frame)
+            a_dataset_idx[loc_i:loc_i + num_frame] = np.arange(loc_d, loc_d + num_frame)
             loc_i += num_frame
             loc_d += num_frame + config['input']['margin_f'] + config['input']['num_frame'] - 1
 
         if div_flag is True:
-            fi = open(d_dataset+'/idx/'+attribute+'_'+str(div).zfill(3)+'.pkl', 'wb')
+            fi = open(d_dataset + '/idx/' + attribute + '_' + str(div).zfill(3) + '.pkl', 'wb')
         else:
-            fi = open(d_dataset+'/idx/'+attribute+'.pkl', 'wb')
+            fi = open(d_dataset + '/idx/' + attribute + '.pkl', 'wb')
 
         pickle.dump(a_dataset_idx, fi, protocol=4)
         fi.close()
@@ -94,7 +97,7 @@ def make_dataset(filelist, attribute, d_feature, d_label, d_dataset, config, n_d
     else:
         zero_value = config['feature']['log_offset']
     for div in range(n_div):
-        print('div: '+str(div)+'/'+str(n_div))
+        print('div: ' + str(div) + '/' + str(n_div))
         if config['input']['max_value'] > 0.0:
             a_dataset_feature = np.zeros([a_total_num_frame[div], config['feature']['mel_bins']], dtype=np.float32)
         else:
@@ -105,7 +108,7 @@ def make_dataset(filelist, attribute, d_feature, d_label, d_dataset, config, n_d
             print('(feature) '+str(i)+'/'+str(len(a_fname[div]))+': '+str(a_fname[div][i]))
 
             num_frame = a_num_frame[div][i]
-            with open(d_feature+'/'+a_fname[div][i]+'.pkl', 'rb') as f:
+            with open(d_feature+'/' + a_fname[div][i] + '.pkl', 'rb') as f:
                 feature_tmp = pickle.load(f)
             num_frame_feature = feature_tmp.shape[0]
             if config['input']['max_value'] > 0.0:
@@ -117,9 +120,9 @@ def make_dataset(filelist, attribute, d_feature, d_label, d_dataset, config, n_d
             loc_d += num_frame + config['input']['margin_f'] + config['input']['num_frame'] - 1
 
         if div_flag is True:
-            ff = open(d_dataset+'/feature/'+attribute+'_'+str(div).zfill(3)+'.pkl', 'wb')
+            ff = open(d_dataset + '/feature/' + attribute + '_' + str(div).zfill(3) + '.pkl', 'wb')
         else:
-            ff = open(d_dataset+'/feature/'+attribute+'.pkl', 'wb')
+            ff = open(d_dataset + '/feature/' + attribute + '.pkl', 'wb')
 
         pickle.dump(a_dataset_feature, ff, protocol=4)
         ff.close()
@@ -129,7 +132,7 @@ def make_dataset(filelist, attribute, d_feature, d_label, d_dataset, config, n_d
     print('** label(mpe) **')
     for div in range(n_div):
         print('div: '+str(div)+'/'+str(n_div))
-        a_dataset_label_mpe = np.zeros([a_total_num_frame[div], config['midi']['num_note']], dtype=np.bool)
+        a_dataset_label_mpe = np.zeros([a_total_num_frame[div], config['midi']['num_note']], dtype=bool)
 
         loc_d = config['input']['margin_b']
         for i in range(len(a_fname[div])):
@@ -182,26 +185,26 @@ def make_dataset(filelist, attribute, d_feature, d_label, d_dataset, config, n_d
 
     print('** label(offset) **')
     for div in range(n_div):
-        print('div: '+str(div)+'/'+str(n_div))
+        print('div: ' + str(div) + '/' + str(n_div))
         a_dataset_label_offset = np.zeros([a_total_num_frame[div], config['midi']['num_note']], dtype=np.float32)
 
         loc_d = config['input']['margin_b']
         for i in range(len(a_fname[div])):
-            print('(label(offset)) '+str(i)+'/'+str(len(a_fname[div]))+': '+str(a_fname[div][i]))
+            print('(label(offset)) ' + str(i) + '/' + str(len(a_fname[div])) + ': ' + str(a_fname[div][i]))
             num_frame = a_num_frame[div][i]
 
-            with open(d_label+'/'+a_fname[div][i]+'.pkl', 'rb') as f:
+            with open(d_label + '/' + a_fname[div][i]+'.pkl', 'rb') as f:
                 label_tmp = pickle.load(f)
             num_frame_label = len(label_tmp['mpe'])
-            a_dataset_label_offset[loc_d:loc_d+num_frame_label] = label_tmp['offset'][:]
+            a_dataset_label_offset[loc_d:loc_d + num_frame_label] = label_tmp['offset'][:]
             del label_tmp
 
             loc_d += num_frame + config['input']['margin_f'] + config['input']['num_frame'] - 1
 
         if div_flag is True:
-            fl_offset = open(d_dataset+'/label_offset/'+attribute+'_'+str(div).zfill(3)+'.pkl', 'wb')
+            fl_offset = open(d_dataset + '/label_offset/' + attribute + '_' + str(div).zfill(3) + '.pkl', 'wb')
         else:
-            fl_offset = open(d_dataset+'/label_offset/'+attribute+'.pkl', 'wb')
+            fl_offset = open(d_dataset + '/label_offset/' + attribute + '.pkl', 'wb')
 
         pickle.dump(a_dataset_label_offset, fl_offset, protocol=4)
         fl_offset.close()
@@ -209,26 +212,26 @@ def make_dataset(filelist, attribute, d_feature, d_label, d_dataset, config, n_d
 
     print('** label(velocity) **')
     for div in range(n_div):
-        print('div: '+str(div)+'/'+str(n_div))
+        print('div: ' + str(div) + '/' + str(n_div))
         a_dataset_label_velocity = np.zeros([a_total_num_frame[div], config['midi']['num_note']], dtype=np.int8)
 
         loc_d = config['input']['margin_b']
         for i in range(len(a_fname[div])):
-            print('(label(velocity)) '+str(i)+'/'+str(len(a_fname[div]))+': '+str(a_fname[div][i]))
+            print('(label(velocity)) ' + str(i) + '/' + str(len(a_fname[div])) + ': ' + str(a_fname[div][i]))
             num_frame = a_num_frame[div][i]
 
-            with open(d_label+'/'+a_fname[div][i]+'.pkl', 'rb') as f:
+            with open(d_label + '/' + a_fname[div][i] + '.pkl', 'rb') as f:
                 label_tmp = pickle.load(f)
             num_frame_label = len(label_tmp['mpe'])
-            a_dataset_label_velocity[loc_d:loc_d+num_frame_label] = label_tmp['velocity'][:]
+            a_dataset_label_velocity[loc_d:loc_d + num_frame_label] = label_tmp['velocity'][:]
             del label_tmp
 
             loc_d += num_frame + config['input']['margin_f'] + config['input']['num_frame'] - 1
 
         if div_flag is True:
-            fl_velocity = open(d_dataset+'/label_velocity/'+attribute+'_'+str(div).zfill(3)+'.pkl', 'wb')
+            fl_velocity = open(d_dataset + '/label_velocity/' + attribute + '_' + str(div).zfill(3) + '.pkl', 'wb')
         else:
-            fl_velocity = open(d_dataset+'/label_velocity/'+attribute+'.pkl', 'wb')
+            fl_velocity = open(d_dataset + '/label_velocity/' + attribute + '.pkl', 'wb')
 
         pickle.dump(a_dataset_label_velocity, fl_velocity, protocol=4)
         fl_velocity.close()
@@ -282,22 +285,22 @@ if __name__ == '__main__':
     if not os.path.isdir(d_dataset):
         os.makedirs(d_dataset)
 
-    if not os.path.isdir(d_dataset+'/idx'):
-        os.makedirs(d_dataset+'/idx')
-    if not os.path.isdir(d_dataset+'/feature'):
-        os.makedirs(d_dataset+'/feature')
-    if not os.path.isdir(d_dataset+'/label_mpe'):
-        os.makedirs(d_dataset+'/label_mpe')
-    if not os.path.isdir(d_dataset+'/label_onset'):
-        os.makedirs(d_dataset+'/label_onset')
-    if not os.path.isdir(d_dataset+'/label_offset'):
-        os.makedirs(d_dataset+'/label_offset')
-    if not os.path.isdir(d_dataset+'/label_velocity'):
-        os.makedirs(d_dataset+'/label_velocity')
+    if not os.path.isdir(d_dataset + '/idx'):
+        os.makedirs(d_dataset + '/idx')
+    if not os.path.isdir(d_dataset + '/feature'):
+        os.makedirs(d_dataset + '/feature')
+    if not os.path.isdir(d_dataset + '/label_mpe'):
+        os.makedirs(d_dataset + '/label_mpe')
+    if not os.path.isdir(d_dataset + '/label_onset'):
+        os.makedirs(d_dataset + '/label_onset')
+    if not os.path.isdir(d_dataset + '/label_offset'):
+        os.makedirs(d_dataset + '/label_offset')
+    if not os.path.isdir(d_dataset + '/label_velocity'):
+        os.makedirs(d_dataset + '/label_velocity')
 
-    make_dataset(d_list+'/train.list', 'train', d_feature, d_label, d_dataset, config, args.n_div_train)
-    make_dataset(d_list+'/valid.list', 'valid', d_feature, d_label, d_dataset, config, args.n_div_valid)
-    make_dataset(d_list+'/test.list', 'test', d_feature, d_label, d_dataset, config, args.n_div_test)
+    # make_dataset(d_list + '/train.list', 'train', d_feature, d_label, d_dataset, config, args.n_div_train)
+    make_dataset(d_list + '/valid.list', 'valid', d_feature, d_label, d_dataset, config, args.n_div_valid)
+    make_dataset(d_list + '/test.list',  'test',  d_feature, d_label, d_dataset, config, args.n_div_test)
 
     # write config file
     config['input']['min_value'] = float(config['input']['min_value'])

@@ -56,7 +56,15 @@ class AMT():
         wave_mono = torch.mean(wave, dim=0)
         tr_fsconv = torchaudio.transforms.Resample(sr, self.config['feature']['sr'])
         wave_mono_16k = tr_fsconv(wave_mono)
-        tr_mel = torchaudio.transforms.MelSpectrogram(sample_rate=self.config['feature']['sr'], n_fft=self.config['feature']['fft_bins'], win_length=self.config['feature']['window_length'], hop_length=self.config['feature']['hop_sample'], pad_mode=self.config['feature']['pad_mode'], n_mels=self.config['feature']['mel_bins'], norm='slaney')
+        tr_mel = torchaudio.transforms.MelSpectrogram(
+            sample_rate=self.config['feature']['sr'],
+            n_fft=self.config['feature']['fft_bins'],
+            win_length=self.config['feature']['window_length'],
+            hop_length=self.config['feature']['hop_sample'],
+            pad_mode=self.config['feature']['pad_mode'],
+            n_mels=self.config['feature']['mel_bins'],
+            norm='slaney'
+        )
         mel_spec = tr_mel(wave_mono_16k)
         a_feature = (torch.log(mel_spec + self.config['feature']['log_offset'])).T
 
@@ -101,10 +109,10 @@ class AMT():
                 else:
                     output_onset_A, output_offset_A, output_mpe_A, output_velocity_A = self.model(input_spec)
 
-            a_output_onset_A[i:i+self.config['input']['num_frame']] = (output_onset_A.squeeze(0)).to('cpu').detach().numpy()
-            a_output_offset_A[i:i+self.config['input']['num_frame']] = (output_offset_A.squeeze(0)).to('cpu').detach().numpy()
-            a_output_mpe_A[i:i+self.config['input']['num_frame']] = (output_mpe_A.squeeze(0)).to('cpu').detach().numpy()
-            a_output_velocity_A[i:i+self.config['input']['num_frame']] = (output_velocity_A.squeeze(0).argmax(2)).to('cpu').detach().numpy()
+            a_output_onset_A[i:i + self.config['input']['num_frame']] = (output_onset_A.squeeze(0)).to('cpu').detach().numpy()
+            a_output_offset_A[i:i + self.config['input']['num_frame']] = (output_offset_A.squeeze(0)).to('cpu').detach().numpy()
+            a_output_mpe_A[i:i + self.config['input']['num_frame']] = (output_mpe_A.squeeze(0)).to('cpu').detach().numpy()
+            a_output_velocity_A[i:i + self.config['input']['num_frame']] = (output_velocity_A.squeeze(0).argmax(2)).to('cpu').detach().numpy()
 
             if mode == 'combination':
                 a_output_onset_B[i:i+self.config['input']['num_frame']] = (output_onset_B.squeeze(0)).to('cpu').detach().numpy()
@@ -159,9 +167,23 @@ class AMT():
                 else:
                     output_onset_A, output_offset_A, output_mpe_A, output_velocity_A = self.model(input_spec)
 
-            a_output_onset_A[i:i+half_frame] = (output_onset_A.squeeze(0)[n_offset:n_offset+half_frame]).to('cpu').detach().numpy()
-            a_output_offset_A[i:i+half_frame] = (output_offset_A.squeeze(0)[n_offset:n_offset+half_frame]).to('cpu').detach().numpy()
-            a_output_mpe_A[i:i+half_frame] = (output_mpe_A.squeeze(0)[n_offset:n_offset+half_frame]).to('cpu').detach().numpy()
+            a_output_onset_A[i:i+half_frame] = (
+                (output_onset_A
+                    .squeeze(0)[n_offset : n_offset+half_frame])
+                    .to('cpu').detach().numpy()
+            )
+            a_output_offset_A[i:i+half_frame] = (
+                (output_offset_A
+                    .squeeze(0)
+                    [n_offset:n_offset+half_frame])
+                .to('cpu').detach().numpy()
+            )
+            a_output_mpe_A[i:i+half_frame] = (
+                (output_mpe_A
+                    .squeeze(0)
+                    [n_offset:n_offset+half_frame])
+                .to('cpu').detach().numpy()
+            )
             a_output_velocity_A[i:i+half_frame] = (output_velocity_A.squeeze(0)[n_offset:n_offset+half_frame].argmax(2)).to('cpu').detach().numpy()
 
             if mode == 'combination':
@@ -171,12 +193,32 @@ class AMT():
                 a_output_velocity_B[i:i+half_frame] = (output_velocity_B.squeeze(0)[n_offset:n_offset+half_frame].argmax(2)).to('cpu').detach().numpy()
 
         if mode == 'combination':
-            return a_output_onset_A, a_output_offset_A, a_output_mpe_A, a_output_velocity_A, a_output_onset_B, a_output_offset_B, a_output_mpe_B, a_output_velocity_B
+            return (
+                a_output_onset_A,
+                a_output_offset_A,
+                a_output_mpe_A,
+                a_output_velocity_A,
+                a_output_onset_B,
+                a_output_offset_B,
+                a_output_mpe_B,
+                a_output_velocity_B
+            )
         else:
             return a_output_onset_A, a_output_offset_A, a_output_mpe_A, a_output_velocity_A
 
 
-    def mpe2note(self, a_onset=None, a_offset=None, a_mpe=None, a_velocity=None, thred_onset=0.5, thred_offset=0.5, thred_mpe=0.5, mode_velocity='ignore_zero', mode_offset='shorter'):
+    def mpe2note(
+            self,
+            a_onset=None,
+            a_offset=None,
+            a_mpe=None,
+            a_velocity=None,
+            thred_onset=0.5,
+            thred_offset=0.5,
+            thred_mpe=0.5,
+            mode_velocity='ignore_zero',
+            mode_offset='shorter'
+    ):
         ## mode_velocity
         ##  org: 0-127
         ##  ignore_zero: 0-127 (output note does not include 0) (default)
@@ -221,6 +263,7 @@ class AMT():
                             else:
                                 onset_time = (i * hop_sec + (hop_sec * 0.5 * (a_onset[i+1][j] - a_onset[i-1][j]) / (a_onset[i][j] - a_onset[i-1][j])))
                         a_onset_detect.append({'loc': i, 'onset_time': onset_time})
+
             a_offset_detect = []
             for i in range(len(a_offset)):
                 if a_offset[i][j] >= thred_offset:
@@ -262,7 +305,7 @@ class AMT():
 
                 if idx_on + 1 < len(a_onset_detect):
                     loc_next = a_onset_detect[idx_on+1]['loc']
-                    #time_next = loc_next * hop_sec
+                    # time_next = loc_next * hop_sec
                     time_next = a_onset_detect[idx_on+1]['onset_time']
                 else:
                     loc_next = len(a_mpe)
@@ -286,7 +329,7 @@ class AMT():
                 # (1frame longer)
                 loc_mpe = loc_onset+1
                 flag_mpe = False
-                #time_mpe = 0###
+                # time_mpe = 0 ###
                 for ii_mpe in range(loc_onset+1, loc_next):
                     if a_mpe[ii_mpe][j] < thred_mpe:
                         loc_mpe = ii_mpe
@@ -335,9 +378,11 @@ class AMT():
                     if velocity_value > 0:
                         a_note.append({'pitch': pitch_value, 'onset': float(time_onset), 'offset': offset_value, 'velocity': velocity_value})
 
-                if (len(a_note) > 1) and \
-                   (a_note[len(a_note)-1]['pitch'] == a_note[len(a_note)-2]['pitch']) and \
-                   (a_note[len(a_note)-1]['onset'] < a_note[len(a_note)-2]['offset']):
+                if (
+                        (len(a_note) > 1) and
+                        (a_note[len(a_note)-1]['pitch'] == a_note[len(a_note)-2]['pitch']) and
+                        (a_note[len(a_note)-1]['onset'] < a_note[len(a_note)-2]['offset'])
+                ):
                     a_note[len(a_note)-2]['offset'] = a_note[len(a_note)-1]['onset']
 
         a_note = sorted(sorted(a_note, key=lambda x: x['pitch']), key=lambda x: x['onset'])
@@ -348,7 +393,14 @@ class AMT():
         midi = pretty_midi.PrettyMIDI()
         instrument = pretty_midi.Instrument(program=0)
         for note in a_note:
-            instrument.notes.append(pretty_midi.Note(velocity=note['velocity'], pitch=note['pitch'], start=note['onset'], end=note['offset']))
+            instrument.notes.append(
+                pretty_midi.Note(
+                    velocity=note['velocity'],
+                    pitch=note['pitch'],
+                    start=note['onset'],
+                    end=note['offset']
+                )
+            )
         midi.instruments.append(instrument)
         midi.write(f_midi)
 

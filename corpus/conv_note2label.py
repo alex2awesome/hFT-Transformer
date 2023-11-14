@@ -24,7 +24,7 @@ def note2label(config, f_note, offset_duration_tolerance_flag):
             max_offset = note['offset']
     
     nframe = int(max_offset * nframe_in_sec + 0.5) + 1
-    a_mpe = np.zeros((nframe, config['midi']['num_note']), dtype=np.bool)
+    a_mpe = np.zeros((nframe, config['midi']['num_note']), dtype=bool)
     a_onset = np.zeros((nframe, config['midi']['num_note']), dtype=np.float32)
     a_offset = np.zeros((nframe, config['midi']['num_note']), dtype=np.float32)
     a_velocity = np.zeros((nframe, config['midi']['num_note']), dtype=np.int8)
@@ -130,7 +130,11 @@ if __name__ == '__main__':
     with open(args.config, 'r', encoding='utf-8') as f:
         config = json.load(f)
 
-    a_attribute = ['train', 'test', 'valid']
+    a_attribute = [
+        # 'train',
+        # 'test',
+        'valid'
+    ]
     for attribute in a_attribute:
         print('-'+attribute+'-')
         with open(args.d_list.rstrip('/')+'/'+str(attribute)+'.list', 'r', encoding='utf-8') as f:

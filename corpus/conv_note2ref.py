@@ -52,8 +52,8 @@ if __name__ == '__main__':
         # 16ms/10ms
         nframe_16ms = int(duration * 62.5 + 0.5)+1
         nframe_10ms = int(duration * 100 + 0.5)+1
-        a_mpe_16ms = np.zeros((nframe_16ms, NUM_PITCH), dtype=np.int)
-        a_mpe_10ms = np.zeros((nframe_10ms, NUM_PITCH), dtype=np.int)
+        a_mpe_16ms = np.zeros((nframe_16ms, NUM_PITCH), dtype=int)
+        a_mpe_10ms = np.zeros((nframe_10ms, NUM_PITCH), dtype=int)
         for n in range(1, len(a_input)):
             onset = float(a_input[n].rstrip('\n').split('\t')[0])
             offset = float(a_input[n].rstrip('\n').split('\t')[1])
@@ -80,7 +80,7 @@ if __name__ == '__main__':
         fo3.close()
 
         # 10ms
-        fo4 = open(args.d_ref.rstrip('\n')+'/'+fname+'_mpe_10ms.txt', 'w', encoding='utf-8')
+        fo4 = open(args.d_ref.rstrip('\n') + '/' + fname+'_mpe_10ms.txt', 'w', encoding='utf-8')
         for i in range(len(a_mpe_10ms)):
             fo4.write(str(round(i*0.01, 2)))
             for j in range(NUM_PITCH):

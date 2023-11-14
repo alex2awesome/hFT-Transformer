@@ -7,16 +7,17 @@ import sys
 import glob
 sys.path.append(os.getcwd())
 from model import amt
+from pydub import AudioSegment
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-input_dir_to_transcribe', help='file list', default='../corpus/MAESTRO-V3/list/test.list')
-    parser.add_argument('-d_wav', help='corpus wav directory', default='../corpus/MAESTRO-V3/wav')
+    # necessary arguments
+    parser.add_argument('-input_dir_to_transcribe', help='file list')
+    parser.add_argument('-output_dir', help='output directory')
     parser.add_argument('-f_config', help='config json file', default='../corpus/config.json')
-
     parser.add_argument('-model_file', help='input model file', default='best_model.pkl')
+    # parameters
     parser.add_argument('-mode', help='mode to transcript (combination|single)', default='combination')
-
     parser.add_argument('-thred_mpe', help='threshold value for mpe detection', type=float, default=0.5)
     parser.add_argument('-thred_onset', help='threshold value for onset detection', type=float, default=0.5)
     parser.add_argument('-thred_offset', help='threshold value for offset detection', type=float, default=0.5)
@@ -25,6 +26,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # list file
+    a_mp3s = glob.glob(os.path.join(args.input_dir_to_transcribe, '*.mp3'))
+    for fname in a_mp3s:
+        if not os.path.exists(fname.replace('.mp3', '.wav')):
+            print('converting ' + fname + ' to .wav...')
+            sound = AudioSegment.from_mp3(fname)
+            sound.export(fname.replace('.mp3', '.wav'), format="wav")
+
     a_list = glob.glob(os.path.join(args.input_dir_to_transcribe, '*.wav'))
 
     # config file
@@ -35,7 +43,6 @@ if __name__ == '__main__':
     AMT = amt.AMT(config, args.model_file, verbose_flag=False)
 
     for fname in a_list:
-
         print('[' + os.path.basename(fname) + ']')
         a_feature = AMT.wav2feature(fname)
 
@@ -73,7 +80,16 @@ if __name__ == '__main__':
         )
 
         # output to MIDI
-        output_fname = fname.replace('.wav', '_transcribed.mid')
+        output_fname = fname.replace('.wav', '_transcribed.midi')
         AMT.note2midi(a_note_2nd_predict, output_fname)
 
     print('** done **')
+
+
+"""
+python evaluation/transcribe_new_files.py \
+    -input_dir_to_transcribe ../data/test-album \
+    -output_dir ../data/test-album-transcribed \
+    -f_config corpus/MAESTRO-V3/dataset/config.json \
+    -model_file evaluation/checkpoint/MAESTRO-V3/model_016_003.pkl
+"""

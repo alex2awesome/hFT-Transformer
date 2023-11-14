@@ -11,7 +11,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     print('** rename MAESTRO wav/mid file **')
-    a_attribute = ['train', 'valid', 'test']
+    a_attribute = [
+        'train',
+        'valid',
+        'test'
+    ]
     for attribute in a_attribute:
         with open(args.d_list.rstrip('/')+'/'+attribute+'.tsv', 'r', encoding='utf-8') as f:
             a_in = f.readlines()
@@ -19,6 +23,15 @@ if __name__ == '__main__':
             fname_wav = a_in[i].rstrip('\n').split('\t')[5]
             fname_mid = a_in[i].rstrip('\n').split('\t')[4]
             number = a_in[i].rstrip('\n').split('\t')[7]
-            os.symlink(args.d_i.rstrip('/')+'/'+fname_wav, args.d_o.rstrip('/')+'/wav/'+attribute+'_'+number+'.wav')
-            os.symlink(args.d_i.rstrip('/')+'/'+fname_mid, args.d_o.rstrip('/')+'/midi/'+attribute+'_'+number+'.mid')
+
+            wav_orig = os.path.join(args.d_i, fname_wav)
+            wav_sym = os.path.join(args.d_o, 'wav', attribute + '_' + number + '.wav')
+            mid_orig = os.path.join(args.d_i, fname_mid)
+            mid_sym = os.path.join(args.d_o, 'midi', attribute + '_' + number + '.mid')
+            if os.path.exists(wav_sym) or os.path.islink(wav_sym):
+                os.unlink(wav_sym)
+            if os.path.exists(mid_sym) or os.path.islink(mid_sym):
+                os.unlink(mid_sym)
+            os.symlink(wav_orig, wav_sym)
+            os.symlink(mid_orig, mid_sym)
     print('** done **')

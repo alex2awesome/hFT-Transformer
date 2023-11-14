@@ -50,15 +50,17 @@ if __name__ == '__main__':
     print(' ablation mode  : '+str(args.ablation))
 
     # parameters
-    with open(args.d_cp.rstrip('/')+'/parameter.json', 'r', encoding='utf-8') as f:
+    with open(args.d_cp.rstrip('/') + '/parameter.json', 'r', encoding='utf-8') as f:
         parameters = json.load(f)
 
     # list file
     a_list = []
     with open(args.f_list, 'r', encoding='utf-8') as f:
         a_list_tmp = f.readlines()
+
     for fname in a_list_tmp:
         a_list.append(fname.rstrip('\n'))
+
     del a_list_tmp
 
     # config file
@@ -66,7 +68,7 @@ if __name__ == '__main__':
         config = json.load(f)
 
     # AMT class
-    AMT = amt.AMT(config, args.d_cp.rstrip('/')+'/'+args.m, verbose_flag = False)
+    AMT = amt.AMT(config, args.d_cp.rstrip('/') + '/' + args.m, verbose_flag = False)
 
     # inference
     out_dir_mpe = args.d_mpe.rstrip('/')
@@ -76,33 +78,64 @@ if __name__ == '__main__':
         print('['+str(fname)+']')
 
         # feature
-        if args.calc_feature is True:
-            a_feature = AMT.wav2feature(args.d_wav.rstrip('/')+'/'+fname+'.wav')
-            with open(args.d_fe.rstrip('/')+'/'+fname+'.pkl', 'wb') as f:
+        if args.calc_feature:
+            a_feature = AMT.wav2feature(args.d_wav.rstrip('/') + '/' + fname + '.wav')
+            with open(args.d_fe.rstrip('/') + '/' + fname + '.pkl', 'wb') as f:
                 pickle.dump(a_feature, f, protocol=4)
         else:
-            with open(args.d_fe.rstrip('/')+'/'+fname+'.pkl', 'rb') as f:
+            with open(args.d_fe.rstrip('/') + '/' + fname + '.pkl', 'rb') as f:
                 a_feature = pickle.load(f)
 
         # transcript
-        if args.calc_transcript is True:
+        if args.calc_transcript:
             if args.mode == 'combination':
                 if args.n_stride > 0:
-                    output_1st_onset, output_1st_offset, output_1st_mpe, output_1st_velocity, output_2nd_onset, output_2nd_offset, output_2nd_mpe, output_2nd_velocity = AMT.transcript_stride(a_feature, args.n_stride, mode=args.mode, ablation_flag=args.ablation)
+                    (
+                        output_1st_onset,
+                        output_1st_offset,
+                        output_1st_mpe,
+                        output_1st_velocity,
+                        output_2nd_onset,
+                        output_2nd_offset,
+                        output_2nd_mpe,
+                        output_2nd_velocity
+                    ) = AMT.transcript_stride(a_feature, args.n_stride, mode=args.mode, ablation_flag=args.ablation)
                 else:
-                    output_1st_onset, output_1st_offset, output_1st_mpe, output_1st_velocity, output_2nd_onset, output_2nd_offset, output_2nd_mpe, output_2nd_velocity = AMT.transcript(a_feature, mode=args.mode, ablation_flag=args.ablation)
+                    (
+                        output_1st_onset,
+                        output_1st_offset,
+                        output_1st_mpe,
+                        output_1st_velocity,
+                        output_2nd_onset,
+                        output_2nd_offset,
+                        output_2nd_mpe,
+                        output_2nd_velocity
+                    ) = AMT.transcript(a_feature, mode=args.mode, ablation_flag=args.ablation)
             else:
                 if args.n_stride > 0:
-                    output_1st_onset, output_1st_offset, output_1st_mpe, output_1st_velocity = AMT.transcript_stride(a_feature, args.n_stride, mode=args.mode, ablation_flag=args.ablation)
+                    (
+                        output_1st_onset,
+                        output_1st_offset,
+                        output_1st_mpe,
+                        output_1st_velocity
+                    ) = AMT.transcript_stride(a_feature, args.n_stride, mode=args.mode, ablation_flag=args.ablation)
                 else:
-                    output_1st_onset, output_1st_offset, output_1st_mpe, output_1st_velocity = AMT.transcript(a_feature, mode=args.mode, ablation_flag=args.ablation)
+                    (
+                        output_1st_onset,
+                        output_1st_offset,
+                        output_1st_mpe,
+                        output_1st_velocity
+                    ) = AMT.transcript(a_feature, mode=args.mode, ablation_flag=args.ablation)
 
             with open(out_dir_mpe+'/'+fname+'_1st.onset', 'wb') as f:
                 pickle.dump(output_1st_onset, f, protocol=4)
+
             with open(out_dir_mpe+'/'+fname+'_1st.offset', 'wb') as f:
                 pickle.dump(output_1st_offset, f, protocol=4)
+
             with open(out_dir_mpe+'/'+fname+'_1st.mpe', 'wb') as f:
                 pickle.dump(output_1st_mpe, f, protocol=4)
+
             with open(out_dir_mpe+'/'+fname+'_1st.velocity', 'wb') as f:
                 pickle.dump(output_1st_velocity, f, protocol=4)
 
@@ -137,29 +170,35 @@ if __name__ == '__main__':
                     output_2nd_velocity = pickle.load(f)
 
         # note (mpe2note)
-        a_note_1st_predict = AMT.mpe2note(a_onset=output_1st_onset,
-                                          a_offset=output_1st_offset,
-                                          a_mpe=output_1st_mpe,
-                                          a_velocity=output_1st_velocity,
-                                          thred_onset=args.thred_onset,
-                                          thred_offset=args.thred_offset,
-                                          thred_mpe=args.thred_mpe,
-                                          mode_velocity='ignore_zero',
-                                          mode_offset='shorter')
+        a_note_1st_predict = AMT.mpe2note(
+            a_onset=output_1st_onset,
+            a_offset=output_1st_offset,
+            a_mpe=output_1st_mpe,
+            a_velocity=output_1st_velocity,
+            thred_onset=args.thred_onset,
+            thred_offset=args.thred_offset,
+            thred_mpe=args.thred_mpe,
+            mode_velocity='ignore_zero',
+            mode_offset='shorter'
+        )
+
         if args.mode == 'combination':
-            a_note_2nd_predict = AMT.mpe2note(a_onset=output_2nd_onset,
-                                              a_offset=output_2nd_offset,
-                                              a_mpe=output_2nd_mpe,
-                                              a_velocity=output_2nd_velocity,
-                                              thred_onset=args.thred_onset,
-                                              thred_offset=args.thred_offset,
-                                              thred_mpe=args.thred_mpe,
-                                              mode_velocity='ignore_zero',
-                                              mode_offset='shorter')
-        with open(out_dir_note+'/'+fname+'_1st.json', 'w', encoding='utf-8') as f:
+            a_note_2nd_predict = AMT.mpe2note(
+                a_onset=output_2nd_onset,
+                a_offset=output_2nd_offset,
+                a_mpe=output_2nd_mpe,
+                a_velocity=output_2nd_velocity,
+                thred_onset=args.thred_onset,
+                thred_offset=args.thred_offset,
+                thred_mpe=args.thred_mpe,
+                mode_velocity='ignore_zero',
+                mode_offset='shorter'
+            )
+        with open(out_dir_note + '/' + fname + '_1st.json', 'w', encoding='utf-8') as f:
             json.dump(a_note_1st_predict, f, ensure_ascii=False, indent=4, sort_keys=False)
+
         if args.mode == 'combination':
-            with open(out_dir_note+'/'+fname+'_2nd.json', 'w', encoding='utf-8') as f:
+            with open(out_dir_note + '/' + fname + '_2nd.json', 'w', encoding='utf-8') as f:
                 json.dump(a_note_2nd_predict, f, ensure_ascii=False, indent=4, sort_keys=False)
 
     print('** done **')

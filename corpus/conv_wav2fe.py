@@ -32,19 +32,27 @@ if __name__ == '__main__':
     # AMT class
     AMT = amt.AMT(config, None, None)
 
-    a_attribute = ['train', 'test', 'valid']
+    a_attribute = [
+        # 'train',
+        # 'test',
+        'valid'
+    ]
     for attribute in a_attribute:
-        print('-'+attribute+'-')
-        with open(args.d_list.rstrip('/')+'/'+str(attribute)+'.list', 'r', encoding='utf-8') as f:
+        print('-' + attribute + '-')
+        with open(args.d_list.rstrip('/') + '/' + str(attribute) + '.list', 'r', encoding='utf-8') as f:
             a_input = f.readlines()
 
         for i in range(len(a_input)):
+            # try:
             fname = a_input[i].rstrip('\n')
             print(fname)
 
             # convert wav to feature
-            a_feature = AMT.wav2feature(args.d_wav.rstrip('/')+'/'+fname+'.wav')
-            with open(args.d_feature.rstrip('/')+'/'+fname+'.pkl', 'wb') as f:
+            a_feature = AMT.wav2feature(args.d_wav.rstrip('/') + '/' + fname + '.wav')
+            with open(args.d_feature.rstrip('/') + '/' + fname + '.pkl', 'wb') as f:
                 pickle.dump(a_feature, f, protocol=4)
+            # except RuntimeError as e:
+            #     print('RuntimeError: ' + str(e))
+            #     pass
 
     print('** done **')

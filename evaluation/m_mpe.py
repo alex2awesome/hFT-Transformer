@@ -84,7 +84,7 @@ if __name__ == '__main__':
         # estimated file
         with open(args.d_est.rstrip('/')+'/'+fname+'_'+str(args.output)+'.mpe', 'rb') as f:
             a_mpe_est = pickle.load(f)
-        nbin=a_mpe_est.shape[1]
+        nbin = a_mpe_est.shape[1]
 
         if args.hop == 16:
             # convert estimated file from .mpe to .txt
@@ -176,5 +176,6 @@ if __name__ == '__main__':
 
     with open(args.d_out.rstrip('/')+'/result_mpe'+valid_data+'_'+str(args.output)+'.json', 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=4, sort_keys=False)
+
     print(result)
     print('** done **')

@@ -84,16 +84,20 @@ def midi2note(config, f_midi, verbose_flag = False):
                     if (a_push[i] is False) and (a_sustain[i] is True):
                         if verbose_flag is True:
                             print('## output sustain pedal off : '+str(i))
-                            print({'onset': a_onset[i],
-                                   'offset': time_in_sec,
-                                   'pitch': i,
-                                   'velocity': a_velocity[i],
-                                   'reonset': a_reonset[i]})
-                        a_note.append({'onset': a_onset[i],
-                                       'offset': time_in_sec,
-                                       'pitch': i,
-                                       'velocity': a_velocity[i],
-                                       'reonset': a_reonset[i]})
+                            print({
+                                'onset': a_onset[i],
+                                'offset': time_in_sec,
+                                'pitch': i,
+                                'velocity': a_velocity[i],
+                                'reonset': a_reonset[i]
+                            })
+                        a_note.append({
+                            'onset': a_onset[i],
+                            'offset': time_in_sec,
+                            'pitch': i,
+                            'velocity': a_velocity[i],
+                            'reonset': a_reonset[i]
+                        })
                         a_onset[i] = -1
                         a_velocity[i] = -1
                         a_reonset[i] = False
@@ -119,11 +123,13 @@ def midi2note(config, f_midi, verbose_flag = False):
             if (a_push[note] is True) or (a_sustain[note] is True):
                 if verbose_flag is True:
                     print('## output reonset : '+str(note))
-                    print({'onset': a_onset[note],
-                           'offset': time_in_sec,
-                           'pitch': note,
-                           'velocity': a_velocity[note],
-                           'reonset': a_reonset[note]})
+                    print({
+                        'onset': a_onset[note],
+                        'offset': time_in_sec,
+                        'pitch': note,
+                        'velocity': a_velocity[note],
+                        'reonset': a_reonset[note]
+                    })
                 # reonset
                 a_note.append({'onset': a_onset[note],
                                'offset': time_in_sec,
@@ -210,7 +216,11 @@ if __name__ == '__main__':
     with open(args.config, 'r', encoding='utf-8') as f:
         config = json.load(f)
 
-    a_attribute = ['train', 'test', 'valid']
+    a_attribute = [
+        # 'train',
+        # 'test',
+        'valid'
+    ]
     for attribute in a_attribute:
         print('-'+attribute+'-')
         with open(args.d_list.rstrip('/')+'/'+str(attribute)+'.list', 'r', encoding='utf-8') as f:
