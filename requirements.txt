@@ -4,3 +4,5 @@ torchaudio==0.10.1
 mido==1.2.9
 pretty_midi==0.2.9
 mir_eval==0.7
+pydub
+speechbrain
